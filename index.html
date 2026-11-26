@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Aura — Daily Planner AI Agent</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="3"></rect>
+            <path d="M16 2v4M8 2v4M3 10h18"></path>
+            <path d="m9 16 2 2 4-4"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">Aura</h1>
+          <p class="brand-subtitle">Daily Planner AI Agent</p>
+        </div>
+      </div>
+
+      <nav class="date-nav" aria-label="Date navigation">
+        <button id="prevDayBtn" class="icon-btn" type="button" title="Previous day" aria-label="Previous day">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <button id="todayBtn" class="btn btn-subtle btn-sm" type="button">Today</button>
+        <label class="date-picker-wrap">
+          <span class="sr-only">Select date</span>
+          <input id="datePicker" type="date" class="date-input">
+        </label>
+        <button id="nextDayBtn" class="icon-btn" type="button" title="Next day" aria-label="Next day">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </nav>
+
+      <div class="topbar-actions">
+        <button id="agentModePill" class="mode-pill" type="button" title="Configure AI Agent settings">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="agentModeLabel">Offline Agent</span>
+        </button>
+        <button id="exportBtn" class="icon-btn" type="button" title="Backup & Export (.json / .ics)" aria-label="Backup and Export">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </button>
+        <button id="settingsBtn" class="icon-btn" type="button" title="AI & Schedule Settings" aria-label="Settings">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path>
+          </svg>
+        </button>
+        <button id="themeToggleBtn" class="icon-btn" type="button" title="Toggle light/dark theme" aria-label="Toggle theme">
+          <svg id="themeIconSun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+          </svg>
+          <svg id="themeIconMoon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden>
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Mobile Pane Switcher -->
+    <div class="mobile-switcher" role="tablist" aria-label="Workspace view">
+      <button id="mobileTabPlan" class="mobile-tab active" role="tab" aria-selected="true" type="button">Daily Plan</button>
+      <button id="mobileTabAgent" class="mobile-tab" role="tab" aria-selected="false" type="button">AI Agent Chat</button>
+    </div>
+
+    <!-- Main Split Workspace -->
+    <main class="workspace">
+      <!-- Left Pane: Daily Plan & Schedule -->
+      <section id="planPane" class="pane plan-pane" aria-label="Daily plan">
+        <div class="plan-header">
+          <div>
+            <h2 id="selectedDateHeading" class="day-heading">Today</h2>
+            <p id="selectedDateSub" class="day-subheading">Loading schedule…</p>
+          </div>
+          <div class="plan-header-actions">
+            <div class="segmented" role="group" aria-label="Schedule display mode">
+              <button id="viewListBtn" class="seg-btn active" type="button">Tasks</button>
+              <button id="viewTimelineBtn" class="seg-btn" type="button">Timeline</button>
+            </div>
+            <button id="autoScheduleBtn" class="btn btn-primary btn-sm" type="button" title="Automatically slot unscheduled tasks by priority">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3z"/></svg>
+              Auto-Schedule
+            </button>
+          </div>
+        </div>
+
+        <!-- Daily Metrics Strip -->
+        <div class="stats-grid" aria-label="Daily progress summary">
+          <div class="stat-card">
+            <span class="stat-label">Completed</span>
+            <strong id="statCompleted" class="stat-value">0 / 0</strong>
+            <div class="progress-track" aria-hidden="true">
+              <div id="statProgressBar" class="progress-fill" style="width: 0%"></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Planned Time</span>
+            <strong id="statHours" class="stat-value">0h 0m</strong>
+            <span id="statRemaining" class="stat-meta">0m remaining</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">High Priority</span>
+            <strong id="statHighPriority" class="stat-value">0</strong>
+            <span id="statConflicts" class="stat-meta">No conflicts</span>
+          </div>
+        </div>
+
+        <!-- Quick Add Form -->
+        <form id="quickAddForm" class="quick-add" autocomplete="off">
+          <label for="quickAddInput" class="sr-only">Quick add a task</label>
+          <input
+            id="quickAddInput"
+            type="text"
+            class="quick-add-input"
+            placeholder="Quick add… e.g. Review Q4 slides at 2pm for 45m !high"
+          >
+          <button id="openNewTaskModalBtn" class="btn btn-subtle btn-sm" type="button" title="Open detailed task form">Details</button>
+          <button class="btn btn-primary btn-sm" type="submit">Add</button>
+        </form>
+
+        <!-- Filter & Actions Bar -->
+        <div class="filter-bar">
+          <div class="filter-pills" role="group" aria-label="Filter tasks">
+            <button class="filter-pill active" data-filter="all" type="button">All</button>
+            <button class="filter-pill" data-filter="pending" type="button">Pending</button>
+            <button class="filter-pill" data-filter="high" type="button">High Priority</button>
+            <button class="filter-pill" data-filter="done" type="button">Done</button>
+          </div>
+          <span id="syncIndicator" class="sync-indicator" title="Storage status">Saved locally</span>
+        </div>
+
+        <!-- Task List View -->
+        <div id="taskListContainer" class="task-list" aria-live="polite"></div>
+
+        <!-- Timeline View -->
+        <div id="timelineContainer" class="timeline-view" hidden></div>
+      </section>
+
+      <!-- Right Pane: Conversational AI Agent -->
+      <aside id="agentPane" class="pane agent-pane" aria-label="AI Daily Planner Agent">
+        <div class="agent-header">
+          <div class="agent-identity">
+            <div class="agent-avatar" aria-hidden="true">✦</div>
+            <div>
+              <h2 class="agent-title">Planner Agent</h2>
+              <p id="agentStatusSub" class="agent-status">Ready • Built-in Offline Intelligence</p>
+            </div>
+          </div>
+          <div class="agent-header-actions">
+            <button id="undoAgentBtn" class="btn btn-subtle btn-sm" type="button" disabled title="Undo the last agent change">Undo</button>
+            <button id="clearChatBtn" class="icon-btn" type="button" title="Clear conversation" aria-label="Clear conversation">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                <path d="M10 11v6M14 11v6"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Suggested Prompt Chips -->
+        <div class="prompt-chips" aria-label="Quick agent commands">
+          <button class="chip" type="button" data-prompt="Plan my day and auto-schedule unscheduled tasks">Plan my day</button>
+          <button class="chip" type="button" data-prompt="Prioritize my pending tasks and explain what to tackle first">Prioritize tasks</button>
+          <button class="chip" type="button" data-prompt="Summarize today's schedule and check for conflicts or free slots">Daily briefing</button>
+          <button class="chip" type="button" data-prompt="Add a 45m deep work focus block at 2pm high priority">Add focus block</button>
+          <button class="chip" type="button" data-prompt="Move all unfinished tasks to tomorrow">Rollover unfinished</button>
+        </div>
+
+        <!-- Chat Messages Feed -->
+        <div id="chatMessages" class="chat-feed" role="log" aria-live="polite"></div>
+
+        <!-- Chat Composer -->
+        <form id="chatForm" class="chat-composer">
+          <label for="chatInput" class="sr-only">Message your Daily Planner AI Agent</label>
+          <textarea
+            id="chatInput"
+            class="chat-input"
+            rows="1"
+            placeholder="Tell Aura what to add, prioritize, or reschedule… (Press / to focus)"
+          ></textarea>
+          <button id="chatSendBtn" class="btn btn-primary send-btn" type="submit" aria-label="Send message">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </form>
+      </aside>
+    </main>
+  </div>
+
+  <!-- Task Editor Modal -->
+  <dialog id="taskDialog" class="modal">
+    <form id="taskForm" class="modal-card" method="dialog">
+      <div class="modal-header">
+        <h3 id="taskDialogTitle">New Task</h3>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="taskIdInput">
+        <div class="field">
+          <label for="taskTitleInput">Task title</label>
+          <input id="taskTitleInput" type="text" required placeholder="e.g., Finish quarterly roadmap">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="taskDateInput">Date</label>
+            <input id="taskDateInput" type="date" required>
+          </div>
+          <div class="field">
+            <label for="taskTimeInput">Start time (optional)</label>
+            <input id="taskTimeInput" type="time">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="taskDurationInput">Duration (minutes)</label>
+            <input id="taskDurationInput" type="number" min="5" max="480" step="5" value="30">
+          </div>
+          <div class="field">
+            <label for="taskPriorityInput">Priority</label>
+            <select id="taskPriorityInput">
+              <option value="high">High</option>
+              <option value="medium" selected>Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="taskCategoryInput">Category</label>
+            <select id="taskCategoryInput">
+              <option value="Deep Work">Deep Work</option>
+              <option value="Meetings">Meetings</option>
+              <option value="Admin">Admin</option>
+              <option value="Personal">Personal</option>
+              <option value="Health">Health</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="taskStatusInput">Status</label>
+            <select id="taskStatusInput">
+              <option value="pending">Pending</option>
+              <option value="done">Completed</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="taskNotesInput">Notes</label>
+          <textarea id="taskNotesInput" rows="3" placeholder="Optional context, links, or checklist notes…"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="deleteTaskModalBtn" class="btn btn-danger-ghost" type="button" hidden>Delete</button>
+        <div class="modal-footer-right">
+          <button class="btn btn-subtle" type="button" data-close-dialog>Cancel</button>
+          <button class="btn btn-primary" type="submit">Save Task</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- AI & Preferences Settings Modal -->
+  <dialog id="settingsDialog" class="modal">
+    <form id="settingsForm" class="modal-card modal-wide" method="dialog">
+      <div class="modal-header">
+        <h3>AI Agent &amp; Schedule Settings</h3>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <fieldset class="settings-group">
+          <legend>AI Engine (Bring Your Own Key or Offline)</legend>
+          <div class="field">
+            <label for="providerSelect">Agent Backend</label>
+            <select id="providerSelect">
+              <option value="offline">Built-in Offline Agent (No API Key Needed)</option>
+              <option value="gemini">Google Gemini API (BYOK)</option>
+              <option value="openai">OpenAI-Compatible API (OpenAI / Groq / Ollama / Local)</option>
+            </select>
+          </div>
+
+          <div id="byokFields" class="byok-fields" hidden>
+            <div id="baseUrlField" class="field">
+              <label for="baseUrlInput">API Base URL</label>
+              <input id="baseUrlInput" type="url" placeholder="https://api.openai.com/v1">
+              <small class="field-hint">Tip: Use <code>http://localhost:8085/v1</code> to test the local PowerShell mock endpoint.</small>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="modelInput">Model</label>
+                <input id="modelInput" type="text" placeholder="gemini-2.5-flash">
+              </div>
+              <div class="field">
+                <label for="apiKeyInput">API Key</label>
+                <input id="apiKeyInput" type="password" placeholder="Stored only in this browser">
+              </div>
+            </div>
+            <p class="security-note">Your API key is saved only in local browser storage and sent directly from your browser to the chosen provider endpoint.</p>
+          </div>
+        </fieldset>
+
+        <fieldset class="settings-group">
+          <legend>Daily Schedule Preferences</legend>
+          <div class="field-row">
+            <div class="field">
+              <label for="workStartInput">Workday Start</label>
+              <input id="workStartInput" type="time" value="09:00">
+            </div>
+            <div class="field">
+              <label for="workEndInput">Workday End</label>
+              <input id="workEndInput" type="time" value="18:00">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="breakBufferInput">Buffer Between Tasks (min)</label>
+              <input id="breakBufferInput" type="number" min="0" max="60" step="5" value="10">
+            </div>
+            <div class="field">
+              <label for="peakEnergySelect">Peak Focus Energy</label>
+              <select id="peakEnergySelect">
+                <option value="morning">Morning (09:00 – 12:30)</option>
+                <option value="afternoon">Afternoon (13:00 – 16:30)</option>
+                <option value="evening">Evening (16:30 – 20:00)</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="customInstructionsInput">Custom Agent Instructions (optional)</label>
+            <textarea id="customInstructionsInput" rows="2" placeholder="e.g., Keep lunch free 12:30–13:30. Prefer deep work before noon."></textarea>
+          </div>
+        </fieldset>
+      </div>
+      <div class="modal-footer">
+        <button id="resetDemoBtn" class="btn btn-subtle" type="button">Load Sample Day</button>
+        <div class="modal-footer-right">
+          <button class="btn btn-subtle" type="button" data-close-dialog>Cancel</button>
+          <button class="btn btn-primary" type="submit">Save Settings</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Backup / Export Modal -->
+  <dialog id="exportDialog" class="modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Backup &amp; Export</h3>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body export-options">
+        <button id="downloadIcsBtn" class="export-card" type="button">
+          <strong>Export Selected Day to Calendar (.ics)</strong>
+          <span>Download scheduled tasks for Google Calendar, Outlook, or Apple Calendar.</span>
+        </button>
+        <button id="downloadJsonBtn" class="export-card" type="button">
+          <strong>Download Full JSON Backup (.json)</strong>
+          <span>Save all tasks and preferences locally for backup or transfer.</span>
+        </button>
+        <label class="export-card import-card">
+          <strong>Restore from JSON Backup</strong>
+          <span>Import a previously exported planner backup file.</span>
+          <input id="importJsonInput" type="file" accept="application/json,.json" hidden>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <div class="modal-footer-right">
+          <button class="btn btn-subtle" type="button" data-close-dialog>Close</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="planner-store.js"></script>
+  <script src="agent-engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
