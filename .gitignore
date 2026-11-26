@@ -1,0 +1,13 @@
+# Local runtime state
+data/
+*.state.json
+
+# OS & Editor artifacts
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+.vscode/
+.idea/
+*.log
